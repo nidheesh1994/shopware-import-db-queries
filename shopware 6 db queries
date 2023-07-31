@@ -1,0 +1,38 @@
+alter TABLE `order` drop COLUMN order_date;
+alter TABLE `order` add COLUMN `order_date` date GENERATED ALWAYS AS (cast(`order_date_time` as date)) STORED;
+
+alter TABLE `order` drop COLUMN amount_total;
+alter TABLE `order` add COLUMN `amount_total` double GENERATED ALWAYS AS (json_unquote(json_extract(`price`,_utf8mb4'$.totalPrice'))) VIRTUAL;
+
+alter TABLE `order` drop COLUMN amount_net;
+alter TABLE `order` add COLUMN `amount_net` double GENERATED ALWAYS AS (json_unquote(json_extract(`price`,_utf8mb4'$.netPrice'))) VIRTUAL;
+
+alter TABLE `order` drop COLUMN position_price;
+alter TABLE `order` add COLUMN `position_price` double GENERATED ALWAYS AS (json_unquote(json_extract(`price`,_utf8mb4'$.positionPrice'))) VIRTUAL;
+
+alter TABLE `order` drop COLUMN shipping_total;
+alter TABLE `order` add COLUMN `shipping_total` double GENERATED ALWAYS AS (json_unquote(json_extract(`shipping_costs`,_utf8mb4'$.totalPrice'))) VIRTUAL;
+
+alter TABLE `order` drop COLUMN tax_status;
+alter TABLE `order` add COLUMN `tax_status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci GENERATED ALWAYS AS (json_unquote(json_extract(`price`,_utf8mb4'$.taxStatus'))) VIRTUAL;
+
+alter TABLE `order_delivery_position` drop COLUMN total_price;
+alter TABLE `order_delivery_position` add COLUMN `total_price` int GENERATED ALWAYS AS (json_unquote(json_extract(`price`,_utf8mb4'$.totalPrice'))) VIRTUAL;
+
+alter TABLE `order_delivery_position` drop COLUMN unit_price;
+alter TABLE `order_delivery_position` add COLUMN `unit_price` int GENERATED ALWAYS AS (json_unquote(json_extract(`price`,_utf8mb4'$.unitPrice'))) VIRTUAL;
+
+alter TABLE `order_delivery_position` drop COLUMN quantity;
+alter TABLE `order_delivery_position` add COLUMN `quantity` int GENERATED ALWAYS AS (json_unquote(json_extract(`price`,_utf8mb4'$.quantity'))) VIRTUAL;
+
+alter TABLE `order_line_item` drop COLUMN unit_price;
+alter TABLE `order_line_item` add COLUMN `unit_price` double GENERATED ALWAYS AS (json_unquote(json_extract(`price`,_utf8mb4'$.unitPrice'))) VIRTUAL;
+
+alter TABLE `order_line_item` drop COLUMN total_price;
+alter TABLE `order_line_item` add COLUMN `total_price` double GENERATED ALWAYS AS (json_unquote(json_extract(`price`,_utf8mb4'$.totalPrice'))) VIRTUAL;
+
+alter TABLE `product` drop COLUMN variant_listing_config;
+alter TABLE `product` add COLUMN `variant_listing_config` json GENERATED ALWAYS AS ((case when ((`display_parent` is not null) or (`main_variant_id` is not null) or (`configurator_group_config` is not null)) then json_object(_utf8mb4'displayParent',`display_parent`,_utf8mb4'mainVariantId',lower(hex(`main_variant_id`)),_utf8mb4'configuratorGroupConfig',json_extract(`configurator_group_config`,_utf8mb4'$')) end)) VIRTUAL;
+
+alter TABLE `product_keyword_dictionary` drop COLUMN reversed;
+alter TABLE `product_keyword_dictionary` add COLUMN `reversed` varchar(500) COLLATE utf8mb4_unicode_ci GENERATED ALWAYS AS (reverse(`keyword`)) STORED;
